@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cats or Dogs? The Inferential Process</title>
+<style>
+:root{
+  --ink:#202124; --muted:#5f6368; --line:#d9dde3; --panel:#f6f7f9;
+  --accent:#7a1f2b; --accent2:#b9a56a; --ok:#246b45;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:#fff}
+main{max-width:900px;margin:0 auto;padding:28px 22px 60px}
+h1{font-size:34px;margin:0 0 8px}
+h2{font-size:27px;margin:0 0 18px}
+h3{font-size:20px;margin:22px 0 10px}
+p,li{font-size:18px;line-height:1.45}
+.lead{font-size:21px}
+.card{border:1px solid var(--line);border-radius:14px;padding:22px;margin:18px 0;background:#fff}
+.question{background:var(--panel);border-left:5px solid var(--accent);padding:16px 18px;margin:18px 0;font-size:20px}
+.stop{margin:26px 0;padding:18px;border:2px solid var(--accent);border-radius:12px;text-align:center;font-weight:700;font-size:21px}
+button{font:inherit;font-weight:700;padding:13px 18px;border:0;border-radius:9px;background:var(--accent);color:white;cursor:pointer;margin:8px 8px 8px 0}
+button.secondary{background:#555}
+button:disabled{opacity:.45;cursor:not-allowed}
+.hidden{display:none}
+.icons{font-size:34px;line-height:1.5;letter-spacing:4px;margin:14px 0}
+.answerline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+input[type=number]{font:inherit;width:95px;padding:8px;border:1px solid #aaa;border-radius:6px}
+.feedback{font-weight:700;margin-top:8px}
+.good{color:var(--ok)}
+.summary{font-size:19px}
+.big{font-size:30px;font-weight:700}
+.reveal{font-size:24px;text-align:center}
+.axiswrap{margin:25px 4px 10px}
+.axis{position:relative;height:230px;border-bottom:3px solid #333;margin:0 30px}
+.tick{position:absolute;bottom:-27px;transform:translateX(-50%);font-size:13px}
+.tickline{position:absolute;bottom:-5px;height:9px;border-left:1px solid #777}
+.point{position:absolute;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:var(--accent)}
+.pointlabel{position:absolute;transform:translate(-50%,-50%);font-size:14px;white-space:nowrap}
+.truth{position:absolute;top:0;bottom:0;border-left:3px dashed #222}
+.truthlabel{position:absolute;top:2px;transform:translateX(8px);font-weight:700;font-size:14px}
+.axislabel{text-align:center;margin-top:35px;font-weight:700}
+.steps{display:grid;gap:10px}
+.step{padding:15px 17px;border:1px solid var(--line);border-radius:10px}
+.arrow{text-align:center;font-size:24px}
+.small{font-size:15px;color:var(--muted)}
+@media(max-width:600px){
+ main{padding:20px 14px 45px} h1{font-size:29px} h2{font-size:24px}
+ p,li{font-size:17px}.icons{font-size:29px}.axis{margin:0 10px}
+}
+</style>
+</head>
+<body>
+<main>
+<section id="s1">
+<h1>Cats or Dogs?</h1>
+<p class="lead">An activity about how researchers use samples to learn about populations.</p>
+<div class="card">
+<p>Imagine a population of <strong>10,000 people</strong>. Every person prefers either cats or dogs.</p>
+<div class="question"><strong>Research Question:</strong><br>What percentage of people in this population prefer <strong>dogs</strong>?</div>
+<p>There is one problem: <strong>You cannot study all 10,000 people.</strong></p>
+<p><strong>How could you answer the research question?</strong></p>
+</div>
+<div class="stop">STOP — Discuss with your group and wait for your instructor.</div>
+<button onclick="show(2)">Continue when instructed</button>
+</section>
+
+<section id="s2" class="hidden">
+<h2>Take a Random Sample</h2>
+<p>Instead of studying all 10,000 people, randomly select <strong>10 people</strong> from the population.</p>
+<button id="draw1" onclick="drawTen(1)">Draw a random sample of 10</button>
+<div id="sample1" class="card hidden"></div>
+<div id="entry1" class="hidden">
+<div class="answerline">How many prefer dogs? <input id="dogs1" type="number" min="0" max="10"> out of 10</div>
+<div class="answerline">What percentage of your sample prefers dogs? <input id="pct1" type="number" min="0" max="100" step="10"> %</div>
+<button onclick="checkTen(1)">Check our answers</button>
+<div id="fb1" class="feedback"></div>
+</div>
+<div id="stop2" class="hidden">
+<div class="question">Based on your sample, what percentage of the <strong>population</strong> would you estimate prefers dogs?</div>
+<div class="answerline">Our population estimate: <input id="est1" type="number" min="0" max="100"> %</div>
+<button onclick="lockEstimate1()">Lock in our estimate</button>
+<div id="fbEst1" class="feedback"></div>
+<div id="stop2b" class="stop hidden">STOP — Wait for class discussion.</div>
+<button id="cont2" class="hidden" onclick="show(3)">Continue when instructed</button>
+</div>
+</section>
+
+<section id="s3" class="hidden">
+<h2>Try It Again</h2>
+<p>Your first sample gave you one estimate. What happens if you repeatedly select 10 people from the <strong>same population</strong>?</p>
+<div id="repeatArea"></div>
+<button id="draw2" onclick="quickTen(2)">Draw Sample 2 (n = 10)</button>
+<button id="draw3" class="hidden" onclick="quickTen(3)">Draw Sample 3 (n = 10)</button>
+<button id="draw4" class="hidden" onclick="quickTen(4)">Draw Sample 4 (n = 10)</button>
+<button id="draw5" class="hidden" onclick="quickTen(5)">Draw Sample 5 (n = 10)</button>
+<div id="threeSummary" class="hidden"></div>
+<div id="graph3" class="hidden"></div>
+<div id="stop3" class="stop hidden">STOP — All five samples came from the same population. Why aren't the estimates identical?</div>
+<button id="cont3" class="hidden" onclick="show(4)">Continue when instructed</button>
+</section>
+
+<section id="s4" class="hidden">
+<h2>Increase the Sample Size</h2>
+<p>One way researchers can reduce sampling variability is to use a larger sample. This time, take <strong>two random samples of 50 people</strong>.</p>
+<button id="draw50_1" onclick="drawLarge(50,1)">Draw Sample 1 (n = 50)</button>
+<button id="draw50_2" class="hidden" onclick="drawLarge(50,2)">Draw Sample 2 (n = 50)</button>
+<div id="res50_1" class="card hidden"></div>
+<div id="res50_2" class="card hidden"></div>
+<div id="graph50" class="hidden"></div>
+<div id="stop50" class="hidden">
+<div class="question"><strong>Compare:</strong> How do the two n = 50 estimates compare with your five n = 10 estimates? Does a larger sample guarantee a correct estimate?</div>
+<div class="stop">STOP — Discuss with your group and wait for your instructor.</div>
+<button onclick="show(5)">Continue when instructed</button>
+</div>
+</section>
+
+<section id="s5" class="hidden">
+<h2>Go Big</h2>
+<p>Now take <strong>two random samples of 500 people</strong>.</p>
+<div class="question"><strong>Before you sample:</strong> Compared with your smaller samples, what do you predict will happen to these estimates?</div>
+<button id="draw500_1" onclick="drawLarge(500,1)">Draw Sample 1 (n = 500)</button>
+<button id="draw500_2" class="hidden" onclick="drawLarge(500,2)">Draw Sample 2 (n = 500)</button>
+<div id="res500_1" class="card hidden"></div>
+<div id="res500_2" class="card hidden"></div>
+<div id="graph500" class="hidden"></div>
+<div id="after500" class="hidden">
+<p><strong>Do you know the actual population percentage yet?</strong></p>
+<button onclick="show(6)">Continue</button>
+</div>
+</section>
+
+<section id="s6" class="hidden">
+<h2>Make Your Final Inference</h2>
+<p>You have <strong>never observed the population</strong>. You have observed five random samples of 10, two samples of 50, and two samples of 500.</p>
+<div id="graphFinalEstimate"></div>
+<div class="question">Looking at all of your sample results, what percentage of the population do you estimate prefers dogs?</div>
+<div class="answerline">Our final estimate: <input id="finalEst" type="number" min="0" max="100" step=".1"> %</div>
+<button onclick="lockFinal()">Lock in our estimate</button>
+<div id="finalLocked" class="hidden">
+<p class="summary">Your final inference: <strong><span id="finalVal"></span>%</strong> of the population prefers dogs.</p>
+<div class="stop">STOP — Wait for class discussion. Do not reveal the population until instructed.</div>
+<button onclick="show(7)">Reveal the population when instructed</button>
+</div>
+</section>
+
+<section id="s7" class="hidden">
+<h2>Reveal the Population</h2>
+<div class="card reveal">
+<div class="big">Population = 10,000 people</div>
+<p>🐶 <strong>5,700 prefer dogs — 57%</strong></p>
+<p>🐱 <strong>4,300 prefer cats — 43%</strong></p>
+</div>
+<div id="finalGraph"></div>
+<div class="question">Your final estimate was <strong><span id="yourFinal"></span>%</strong>. The actual population value is <strong>57%</strong>.</div>
+<button onclick="show(8)">What just happened?</button>
+</section>
+
+<section id="s8" class="hidden">
+<h2>The Inferential Process</h2>
+<div class="steps">
+<div class="step"><strong>1. Ask a research question about a population.</strong><br>What percentage of the population prefers dogs?</div>
+<div class="arrow">↓</div>
+<div class="step"><strong>2. Draw a random sample from the population.</strong><br>We could not study all 10,000 people, so we studied smaller groups selected at random.</div>
+<div class="arrow">↓</div>
+<div class="step"><strong>3. Use the sample to answer the research question.</strong><br>We calculated the percentage preferring dogs in each sample.</div>
+<div class="arrow">↓</div>
+<div class="step"><strong>4. Generalize from the sample back to the population.</strong><br>We used what was true of our sample to estimate what was true of the population.</div>
+</div>
+<div class="card">
+<h3>The complication: Sampling Error</h3>
+<p>Different random samples from the same population produced different estimates.</p>
+<p><strong>Increasing sample size reduced the variability of the estimates, but did not eliminate it.</strong></p>
+</div>
+<p class="small">Refresh the page to start a new group's activity.</p>
+</section>
+</main>
+
+<script>
+const P=0.57;
+const vals={};
+let finalEstimate=null;
+
+function show(n){
+  document.querySelectorAll("main > section").forEach(x=>x.classList.add("hidden"));
+  document.getElementById("s"+n).classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+  if(n===6){renderGraph("graphFinalEstimate",false);} if(n===7){document.getElementById("yourFinal").textContent=fmt(finalEstimate); renderGraph("finalGraph",true);}
+}
+function binom(n){
+  let d=0;
+  for(let i=0;i<n;i++) if(Math.random()<P)d++;
+  return d;
+}
+function icons(d,n=10){
+  let a=Array(d).fill("🐶").concat(Array(n-d).fill("🐱"));
+  for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a.join(" ");
+}
+function drawTen(k){
+  let d=binom(10); vals["n10_"+k]=d*10;
+  document.getElementById("sample1").innerHTML='<div class="icons">'+icons(d)+'</div>';
+  document.getElementById("sample1").classList.remove("hidden");
+  document.getElementById("entry1").classList.remove("hidden");
+  document.getElementById("draw1").disabled=true;
+}
+function checkTen(k){
+  let actual=vals["n10_"+k], d=actual/10;
+  let a=Number(document.getElementById("dogs1").value), p=Number(document.getElementById("pct1").value);
+  let fb=document.getElementById("fb1");
+  if(a===d && p===actual){
+    fb.textContent="Correct."; fb.className="feedback good";
+    document.getElementById("stop2").classList.remove("hidden");
+  } else {
+    fb.textContent="Check your count and percentage, then try again."; fb.className="feedback";
+  }
+}
+function lockEstimate1(){
+  let e=Number(document.getElementById("est1").value);
+  let fb=document.getElementById("fbEst1");
+  if(e===vals.n10_1){
+    fb.textContent="Yes. You are using the sample result to estimate the population."; fb.className="feedback good";
+    document.getElementById("stop2b").classList.remove("hidden");
+    document.getElementById("cont2").classList.remove("hidden");
+  }else{
+    fb.textContent="Use the percentage you observed in your sample as your estimate of the population."; fb.className="feedback";
+  }
+}
+function quickTen(k){
+  let d=binom(10), pct=d*10; vals["n10_"+k]=pct;
+  let box=document.createElement("div"); box.className="card";
+  box.innerHTML='<strong>Sample '+k+':</strong><div class="icons">'+icons(d)+'</div><p>'+d+' of 10 prefer dogs = <strong>'+pct+'%</strong></p>';
+  document.getElementById("repeatArea").appendChild(box);
+  document.getElementById("draw"+k).disabled=true;
+  if(k<5) document.getElementById("draw"+(k+1)).classList.remove("hidden");
+  if(k===5){
+    let a=[1,2,3,4,5].map(i=>vals["n10_"+i]+"%").join(", ");
+    document.getElementById("threeSummary").innerHTML='<p class="summary"><strong>Your five n = 10 estimates:</strong> '+a+'</p>';
+    document.getElementById("threeSummary").classList.remove("hidden");
+    document.getElementById("graph3").classList.remove("hidden");
+    renderGraph("graph3",false);
+    document.getElementById("stop3").classList.remove("hidden");
+    document.getElementById("cont3").classList.remove("hidden");
+  }
+}
+function drawLarge(n,k){
+  let d=binom(n), pct=d/n*100;
+  vals["n"+n+"_"+k]=pct;
+  let id="res"+n+"_"+k;
+  document.getElementById(id).innerHTML='<p>🐶 Dogs: <strong>'+d+'</strong></p><p>🐱 Cats: <strong>'+(n-d)+'</strong></p><p><strong>'+d+' / '+n+' = '+fmt(pct)+'% prefer dogs</strong></p><p>Population estimate: <strong>'+fmt(pct)+'%</strong></p>';
+  document.getElementById(id).classList.remove("hidden");
+  document.getElementById("draw"+n+"_"+k).disabled=true;
+  if(k===1){
+    document.getElementById("draw"+n+"_2").classList.remove("hidden");
+  } else if(n===50){
+    document.getElementById("graph50").classList.remove("hidden"); renderGraph("graph50",false);
+    document.getElementById("stop50").classList.remove("hidden");
+  } else {
+    document.getElementById("graph500").classList.remove("hidden"); renderGraph("graph500",false);
+    document.getElementById("after500").classList.remove("hidden");
+  }
+}
+function fmt(x){
+  if(x===null || Number.isNaN(x)) return "";
+  return Math.abs(x-Math.round(x))<1e-9 ? String(Math.round(x)) : x.toFixed(1);
+}
+function lockFinal(){
+  let v=Number(document.getElementById("finalEst").value);
+  if(!Number.isFinite(v)||v<0||v>100){alert("Enter a percentage from 0 to 100.");return;}
+  finalEstimate=v; document.getElementById("finalVal").textContent=fmt(v);
+  document.getElementById("finalLocked").classList.remove("hidden");
+  document.getElementById("finalEst").disabled=true;
+}
+function renderGraph(id,reveal){
+  const el=document.getElementById(id);
+  const pts=[
+    ["n=10, Sample 1",vals.n10_1,10],["n=10, Sample 2",vals.n10_2,10],["n=10, Sample 3",vals.n10_3,10],
+    ["n=10, Sample 4",vals.n10_4,10],["n=10, Sample 5",vals.n10_5,10],
+    ["n=50, Sample 1",vals.n50_1,50],["n=50, Sample 2",vals.n50_2,50],
+    ["n=500, Sample 1",vals.n500_1,500],["n=500, Sample 2",vals.n500_2,500]
+  ].filter(x=>x[1]!==undefined);
+  const colors={10:"#7a1f2b",50:"#2f6f9f",500:"#3d7a4e"};
+  let ticks="";
+  for(let t=0;t<=100;t+=10) ticks+=`<span class="tickline" style="left:${t}%"></span><span class="tick" style="left:${t}%">${t}</span>`;
+  let points="";
+  pts.forEach((p,i)=>{
+    let y=30+i*34;
+    points+=`<span class="point" style="left:${p[1]}%;top:${y}px;background:${colors[p[2]]}"></span><span class="pointlabel" style="left:${p[1]}%;top:${y-13}px">${p[0]}: ${fmt(p[1])}%</span>`;
+  });
+  let truth=reveal?`<span class="truth" style="left:57%"></span><span class="truthlabel" style="left:57%">Population = 57%</span>`:"";
+  let legend='<div style="display:flex;gap:18px;flex-wrap:wrap;font-size:15px;margin-bottom:8px"><span><b style="color:'+colors[10]+'">●</b> n = 10</span><span><b style="color:'+colors[50]+'">●</b> n = 50</span><span><b style="color:'+colors[500]+'">●</b> n = 500</span></div>';
+  let h=Math.max(230,55+pts.length*34);
+  el.innerHTML=`<div class="card"><h3>Your sample estimates</h3>${legend}<div class="axiswrap"><div class="axis" style="height:${h}px">${ticks}${points}${truth}</div><div class="axislabel">Percentage preferring dogs</div></div></div>`;
+}
+</script>
+</body>
+</html>
